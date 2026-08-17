@@ -9,16 +9,29 @@ export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [company, setCompany] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !email || !company) {
+    if (!name || !email || !password || !company) {
       setError("Fill in every field to create your workspace.");
       return;
     }
-    authService.signUp(name, email, company);
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    setError("");
+    setSubmitting(true);
+    const result = await authService.signUp(name, email, password, company);
+    setSubmitting(false);
+    if ("error" in result) {
+      setError(result.error);
+      return;
+    }
     router.push("/dashboard");
   }
 
@@ -37,11 +50,22 @@ export default function SignupPage() {
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@studio.com" />
           </div>
           <div>
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+            />
+          </div>
+          <div>
             <Label>Production Company Name</Label>
             <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Dixtro Inc." />
           </div>
           {error && <p className="text-xs text-[var(--rec)]">{error}</p>}
-          <Button type="submit" className="w-full">Create workspace</Button>
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Creating workspace…" : "Create workspace"}
+          </Button>
         </form>
         <p className="text-xs text-[var(--slate-500)] mt-5 text-center">
           Already have a workspace? <a href="/login" className="underline">Log in</a>

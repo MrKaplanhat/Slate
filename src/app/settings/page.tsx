@@ -16,13 +16,13 @@ export default function SettingsPage() {
 
   if (!workspace || !user) return null;
 
-  function saveWorkspace() {
-    authService.updateWorkspace(workspace!.id, { name });
+  async function saveWorkspace() {
+    await authService.updateWorkspace(workspace!.id, { name });
     refreshStore();
   }
 
-  function toggle(field: "callSheetEnabled" | "reminderEnabled" | "finalReminderEnabled") {
-    authService.updateWorkspace(workspace!.id, { [field]: !workspace![field] });
+  async function toggle(field: "callSheetEnabled" | "reminderEnabled" | "finalReminderEnabled") {
+    await authService.updateWorkspace(workspace!.id, { [field]: !workspace![field] });
     refreshStore();
   }
 

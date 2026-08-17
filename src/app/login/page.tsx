@@ -8,13 +8,18 @@ import { Button, Card, Input, Label } from "@/components/ui/primitives";
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const result = authService.signIn(email);
-    if (!result) {
-      setError("No workspace found for that email. Sign up first.");
+    setError("");
+    setSubmitting(true);
+    const result = await authService.signIn(email, password);
+    setSubmitting(false);
+    if ("error" in result) {
+      setError(result.error);
       return;
     }
     router.push("/dashboard");
@@ -29,14 +34,22 @@ export default function LoginPage() {
             <Label>Email</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@studio.com" />
           </div>
+          <div>
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
           {error && <p className="text-xs text-[var(--rec)]">{error}</p>}
-          <Button type="submit" className="w-full">Log in</Button>
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Logging in…" : "Log in"}
+          </Button>
         </form>
         <p className="text-xs text-[var(--slate-500)] mt-5 text-center">
           No workspace yet? <a href="/signup" className="underline">Create one</a>
-        </p>
-        <p className="text-[11px] text-[var(--slate-500)] mt-3 text-center">
-          This is a mock auth flow for development. Real password auth arrives with Supabase Auth.
         </p>
       </Card>
     </main>
